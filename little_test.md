@@ -230,7 +230,7 @@ from emp;
 
 ## 6. 约束
 
-### 6.1 基础约束
+### 6.1 字段约束
 
 ![image-20240306112510204](.\assets\image-20240306112510204.png)
 
@@ -253,7 +253,87 @@ alter table 表名 add constraint 外键名 foreign key (字段名) references �
 alter table 表名 drop foreign key 外键名;
 ```
 
+![image-20240306140324264](.\assets\image-20240306140324264.png)
 
+
+
+## 7. 多表查询
+
+ ### 7.1 内连接
+
+``` mysql
+-- 隐式内连接
+select 字段列表 from 表1, 表2 where 条件 ...;
+-- 显式内连接
+select 字段列表 from 表1, 表2 on 条件...;
+```
+
+### 7.2 外连接
+
+``` mysql
+-- 左外连接，完全包含左表
+select 字段列表 from 表1 left join 表2 on 条件...;
+-- 右外连接，完全包含右表
+select 字段列表 from 表1 right join 表2 on 条件...;
+```
+
+### 7.3 自连接
+
+``` mysql
+-- 自连接可以是内连接也可以是外连接
+select 字段列表 from 表A 别名1 join 表A 别名2 on 条件...;
+```
+
+### 7.4 联合查询
+
+``` mysql
+-- 将两个查询结果合并
+select * from emp2 where salary > 15000
+union all -- union all 会将所有数据合并，union 则不会
+select * from emp2 where age < 50;
+```
+
+### 7.5 子查询
+
+``` mysql
+-- 标量子查询：根据部门名称，查询员工信息
+select * from emp2 where dept_id = (select id from dept where name = '总裁办');
+-- 列子查询
+select * from emp2
+where dept_id in (select id from dept where name = '总裁办' or name = '市场部');
+-- 行子查询
+select *from emp2
+where (salary, manager_id) =(select salary, id from emp2 where name = '张无忌');
+-- 表子查询
+select e.*, d.* from (select * from emp2 where entry_date > '2000-01-01') e left join dept d on e.dept_id = d.id;
+```
+
+
+
+## 8. 事务
+
+### 8.1 事务基础
+
+- 事务处理要么全部成功，要么全部失败
+
+``` mysql
+-- 查看事务提交方式
+select @@autocommit; -- 1: 自动提交; 0: 手动提交
+-- 设置事务提交方式
+set @@autocommit = 0;
+-- 开启事务
+start transaction;
+-- 提交事务
+commit;
+-- 回滚事务
+rollback;
+```
+
+### 8.2 并发事务问题
+
+>- 脏读：一个事务读到另外一个事务还没有提交的数据。
+>- 不可重复读： 一个事务先后读取同一条记录，但是两次读取的数据不同。
+>- 一个事务按照条件查询数据时，没有对应的数据行，但是在插入数据时，又发现这条数据已经存在，好像出现了**“幻影”**。
 
 
 
